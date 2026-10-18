@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Engineering handbook
+    url: https://github.com/siam-sip-lab/engineering-handbook/blob/main/README.md
+    about: Standards and how we work. Read before opening an issue.
