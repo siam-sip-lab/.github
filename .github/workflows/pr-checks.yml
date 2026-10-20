@@ -1,0 +1,33 @@
+# Reusable pull request hygiene checks for every repository in siam-sip-lab.
+# Call it only on pull_request events.
+name: pr-checks
+
+on:
+  workflow_call:
+
+permissions: {}
+
+jobs:
+  title-and-link:
+    runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
+    steps:
+      - name: Check PR title and issue link
+        shell: bash
+        # Values come in through env, never pasted into the script,
+        # so a PR title cannot inject shell commands.
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          BODY: ${{ github.event.pull_request.body }}
+        run: |
+          title_rule='^(feat|fix|docs|refactor|test|ci|chore|perf|build|revert)(\([a-z0-9-]+\))?!?: .+'
+          link_rule='([Cc]loses|[Ff]ixes|[Rr]esolves) #[0-9]+'
+          if [[ ! "$TITLE" =~ $title_rule ]]; then
+            echo "::error::PR title must follow Conventional Commits, e.g. 'feat(cli): add --format option'. Got: $TITLE"
+            exit 1
+          fi
+          if [[ ! "$BODY" =~ $link_rule ]]; then
+            echo "::error::PR description must link an issue, e.g. 'Closes #12'."
+            exit 1
+          fi
+          echo "Title and issue link OK"
